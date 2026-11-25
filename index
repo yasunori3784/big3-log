@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>BIG3 LOG</title>
+
+  <!-- iPhone PWA (ホーム画面追加) 用メタタグ -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BIG3 LOG" />
+  <meta name="theme-color" content="#0B0D10" />
+
+  <!-- カスタムSVGアイコン (バーベルプレート風バッジ) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231C212B'/%3E%3Cstop offset='100%25' stop-color='%230B0D10'/%3E%3C/linearGradient%3E%3ClinearGradient id='ring' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23EF4444'/%3E%3Cstop offset='100%25' stop-color='%23F59E0B'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='38' fill='url(%23bg)'/%3E%3Ccircle cx='90' cy='90' r='64' fill='none' stroke='url(%23ring)' stroke-width='10'/%3E%3Ccircle cx='90' cy='90' r='46' fill='none' stroke='%232D3545' stroke-width='3' stroke-dasharray='8 6'/%3E%3Ccircle cx='90' cy='90' r='14' fill='%230B0D10' stroke='%23EF4444' stroke-width='4'/%3E%3Ctext x='90' y='58' font-family='Arial Black, sans-serif' font-weight='900' font-size='20' fill='%23FFFFFF' text-anchor='middle' letter-spacing='1'%3EBIG3%3C/text%3E%3Ctext x='90' y='136' font-family='Arial Black, sans-serif' font-weight='900' font-size='18' fill='%23F59E0B' text-anchor='middle' letter-spacing='2'%3ELOG%3C/text%3E%3C/svg%3E" />
+
+  <!-- PWA Manifest (Data URI) -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22BIG3%20LOG%22%2C%22short_name%22%3A%22BIG3%20LOG%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230B0D10%22%2C%22theme_color%22%3A%22%230B0D10%22%7D" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts (Inter + Noto Sans JP) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+          },
+          colors: {
+            obsidian: '#0B0D10',
+            steel: {
+              800: '#151921',
+              700: '#1E2430',
+              600: '#262C3A',
+              500: '#363F52',
+            },
+            crimson: {
+              500: '#EF4444',
+              600: '#DC2626',
+              900: '#451215',
+            },
+            amber: {
+              400: '#FBBF24',
+              500: '#F59E0B',
+              900: '#452A08',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    html, body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background-color: #0B0D10;
+      color: #F3F4F6;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+
+    .safe-top {
+      padding-top: max(12px, env(safe-area-inset-top));
+    }
+
+    .safe-bottom {
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    /* 数値入力のスピナー非表示 */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    /* スクロールバー非表示 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col max-w-md mx-auto bg-obsidian border-x border-steel-600/50 relative select-none">
+
+  <!-- ==================== ヘッダー ==================== -->
+  <header class="sticky top-0 z-30 bg-obsidian/95 backdrop-blur-md border-b border-steel-600 px-4 pb-3 safe-top">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <!-- ロゴバッジ -->
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-crimson-500 to-amber-500 p-[2px] shadow-lg shadow-crimson-500/20">
+          <div class="w-full h-full bg-steel-800 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-crimson-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M6.5 4v16M17.5 4v16M2 12h20"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-lg font-black tracking-wider text-white leading-none">BIG3 <span class="text-crimson-500">LOG</span></h1>
+          </div>
+          <p class="text-[11px] font-medium text-gray-400 mt-0.5">POWERLIFTING TRACKER</p>
+        </div>
+      </div>
+
+      <!-- 保存ステータス表示 -->
+      <div id="saveStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-steel-800 border border-steel-600 text-[11px] font-bold text-emerald-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span id="saveStatusText">保存済</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== メインコンテンツ ==================== -->
+  <main class="flex-1 px-4 pt-3 pb-28 overflow-y-auto">
+
+    <!-- ==================== 1. 記録（ワークアウトログ）画面 ==================== -->
+    <section id="view-log" class="space-y-4">
+
+      <!-- 日付ナビゲーションバー -->
+      <div class="bg-steel-800 rounded-2xl p-2.5 border border-steel-600 flex items-center justify-between shadow-md">
+        <button type="button" onclick="shiftLogDate(-1)" class="w-10 h-10 rounded-xl bg-steel-700 hover:bg-steel-600 text-gray-200 flex items-center justify-center active:scale-95 transition" aria-label="前日">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span id="logDateDisplay" class="text-base font-black text-white tracking-tight">2026/11/25 (水)</span>
+            <span id="logTodayBadge" class="px-2 py-0.5 rounded-md bg-crimson-500/20 text-crimson-500 border border-crimson-500/40 text-[10px] font-black">TODAY</span>
+          </div>
+          <p id="logDaySummaryText" class="text-[11px] text-gray-400 font-medium mt-0.5">総挙上重量: 0 kg</p>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button type="button" id="jumpTodayBtn" onclick="jumpToToday()" class="hidden px-2.5 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black active:scale-95 transition">
+            今日
+          </button>
+          <button type="button" onclick="shiftLogDate(1)" class="w-10 h-10 rounded-xl bg-steel-700 hover:bg-steel-600 text-gray-200 flex items-center justify-center active:scale-95 transition" aria-label="翌日">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- BIG3 / 補助種目 サブタブ切り替え -->
+      <div class="grid grid-cols-2 gap-2 bg-steel-800 p-1.5 rounded-2xl border border-steel-600">
+        <button type="button" id="subtab-big3" onclick="switchLogCategory('big3')" class="py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 bg-crimson-500 text-white shadow-lg shadow-crimson-500/25">
+          <span>🔥 BIG3</span>
+          <span id="count-badge-big3" class="px-1.5 py-0.5 rounded-md bg-black/25 text-[11px]">0</span>
+        </button>
+        <button type="button" id="subtab-accessory" onclick="switchLogCategory('accessory')" class="py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 text-gray-400 hover:text-white">
+          <span>💪 補助種目</span>
+          <span id="count-badge-accessory" class="px-1.5 py-0.5 rounded-md bg-steel-700 text-[11px]">0</span>
+        </button>
+      </div>
+
+      <!-- この日の種目追加バー -->
+      <div class="bg-steel-800/80 rounded-2xl p-3 border border-steel-600 flex items-center gap-2">
+        <select id="exerciseSelectDropdown" class="flex-1 bg-steel-700 text-white text-sm font-bold rounded-xl px-3 py-2.5 border border-steel-500 focus:outline-none focus:border-crimson-500">
+          <!-- JSで動的生成 -->
+        </select>
+        <button type="button" onclick="addExerciseToCurrentDay()" class="px-4 py-2.5 rounded-xl bg-white text-obsidian font-black text-sm shrink-0 active:scale-95 transition shadow-sm">
+          + 追加
+        </button>
+      </div>
+
+      <!-- 選択中カテゴリの実施種目リスト（セット入力カード） -->
+      <div id="activeWorkoutContainer" class="space-y-4">
+        <!-- JSで動的生成 -->
+      </div>
+
+    </section>
+
+    <!-- ==================== 2. カレンダー（履歴）画面 ==================== -->
+    <section id="view-calendar" class="hidden space-y-4">
+
+      <!-- カレンダーカード -->
+      <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 shadow-md">
+        <div class="flex items-center justify-between mb-4">
+          <button type="button" onclick="changeCalendarMonth(-1)" class="w-10 h-10 rounded-xl bg-steel-700 text-gray-200 flex items-center justify-center active:scale-95 transition">
+            ◀
+          </button>
+          <div class="text-center">
+            <h2 id="calendarMonthTitle" class="text-lg font-black text-white">2026年 11月</h2>
+            <p id="calendarMonthStats" class="text-xs font-bold text-amber-400 mt-0.5">今月のトレ日数: 0日</p>
+          </div>
+          <button type="button" onclick="changeCalendarMonth(1)" class="w-10 h-10 rounded-xl bg-steel-700 text-gray-200 flex items-center justify-center active:scale-95 transition">
+            ▶
+          </button>
+        </div>
+
+        <!-- 曜日ヘッダー（月曜始まり） -->
+        <div class="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-2">
+          <div>月</div>
+          <div>火</div>
+          <div>水</div>
+          <div>木</div>
+          <div>金</div>
+          <div class="text-sky-400">土</div>
+          <div class="text-crimson-500">日</div>
+        </div>
+
+        <!-- 日付グリッド -->
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+
+        <!-- 凡例 -->
+        <div class="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-steel-600/70 text-[11px] text-gray-400 font-bold">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-crimson-500 inline-block"></span> BIG3実施</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> 補助種目実施</span>
+        </div>
+      </div>
+
+      <!-- 選択された日の詳細メニュー -->
+      <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 shadow-md space-y-3">
+        <div class="flex items-center justify-between border-b border-steel-600 pb-3">
+          <div>
+            <h3 id="calSelectedDateTitle" class="text-base font-black text-white">11月25日のメニュー</h3>
+            <p id="calSelectedDateVolume" class="text-xs text-gray-400 font-medium mt-0.5">総挙上ボリューム: 0 kg</p>
+          </div>
+          <button type="button" onclick="editSelectedCalendarDate()" class="px-3 py-2 rounded-xl bg-steel-700 hover:bg-steel-600 border border-steel-500 text-xs font-black text-white active:scale-95 transition">
+            この日を編集 ✏️
+          </button>
+        </div>
+
+        <div id="calSelectedDateDetails" class="space-y-3">
+          <!-- JSで動的生成 -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== 3. 種目管理画面 ==================== -->
+    <section id="view-exercises" class="hidden space-y-5">
+
+      <!-- 新規種目追加フォーム -->
+      <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 space-y-3 shadow-md">
+        <h2 class="text-base font-black text-white flex items-center gap-2">
+          <span class="text-crimson-500">＋</span> 種目マスタに新規追加
+        </h2>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-400 mb-1.5">カテゴリ選択</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="masterCatBtn-big3" onclick="selectMasterCategory('big3')" class="py-2.5 rounded-xl text-xs font-black border-2 border-crimson-500 bg-crimson-500/15 text-crimson-500 transition">
+              🔥 BIG3（メイン・バリエーション）
+            </button>
+            <button type="button" id="masterCatBtn-accessory" onclick="selectMasterCategory('accessory')" class="py-2.5 rounded-xl text-xs font-black border border-steel-600 bg-steel-700 text-gray-300 transition">
+              💪 補助種目
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-400 mb-1.5">種目名</label>
+          <div class="flex gap-2">
+            <input id="newExerciseNameInput" type="text" placeholder="例：ポーズベンチ、レッグエクステンション" class="flex-1 bg-obsidian border border-steel-500 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white placeholder-gray-500 focus:outline-none focus:border-crimson-500" />
+            <button type="button" onclick="handleAddMasterExercise()" class="px-4 py-2.5 rounded-xl bg-crimson-500 hover:bg-crimson-600 text-white font-black text-sm shrink-0 active:scale-95 transition">
+              登録
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIG3 種目一覧 -->
+      <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-crimson-500 flex items-center gap-1.5">
+            <span>🔥 BIG3 カテゴリ種目</span>
+          </h3>
+          <span class="text-[11px] text-gray-400">ナロー・ポーズ等もここに追加可</span>
+        </div>
+        <div id="masterList-big3" class="space-y-2"></div>
+      </div>
+
+      <!-- 補助種目一覧 -->
+      <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-amber-400 flex items-center gap-1.5">
+            <span>💪 補助種目 カテゴリ種目</span>
+          </h3>
+          <span class="text-[11px] text-gray-400">並べ替え・削除が可能</span>
+        </div>
+        <div id="masterList-accessory" class="space-y-2"></div>
+      </div>
+
+    </section>
+
+    <!-- ==================== 4. 説明書・設定画面 ==================== -->
+    <section id="view-guide" class="hidden space-y-5">
+
+      <!-- 使い方の手順書 -->
+      <div class="bg-steel-800 rounded-2xl p-5 border border-steel-600 space-y-4 shadow-md">
+        <div class="flex items-center gap-2.5 border-b border-steel-600 pb-3">
+          <span class="text-2xl">📘</span>
+          <div>
+            <h2 class="text-lg font-black text-white">BIG3 LOG 使い方の手順書</h2>
+            <p class="text-xs text-gray-400">セット毎の重量・回数・PRを最速で記録するガイド</p>
+          </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="space-y-1.5">
+          <h3 class="text-sm font-black text-crimson-500 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-crimson-500/20 text-xs">STEP 1</span>
+            iPhoneのホーム画面に追加しよう
+          </h3>
+          <p class="text-xs leading-relaxed text-gray-300">
+            ジムのインターバル中にすぐ開けるよう、Safariでホーム画面にアイコンを置いておくのがおすすめです（データも消えにくくなります）。
+          </p>
+          <ol class="text-xs text-gray-200 bg-obsidian rounded-xl p-3 space-y-1.5 border border-steel-600 list-decimal list-inside font-medium">
+            <li>Safariで画面下の<strong>共有ボタン（四角から上矢印のマーク）</strong>をタップ</li>
+            <li>下にスクロールして<strong>「ホーム画面に追加」</strong>をタップ</li>
+            <li>右上の<strong>「追加」</strong>をタップすれば完了！</li>
+          </ol>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="space-y-1.5">
+          <h3 class="text-sm font-black text-crimson-500 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-crimson-500/20 text-xs">STEP 2</span>
+            BIG3と補助種目をセット単位で記録する
+          </h3>
+          <ul class="text-xs leading-relaxed text-gray-300 space-y-1.5 list-disc list-inside">
+            <li>上のタブで<strong>「BIG3」</strong>と<strong>「補助種目」</strong>を切り替え、種目を選んで<strong>「+ 追加」</strong>を押します。</li>
+            <li>種目カードの中で<strong>重量(kg)</strong>と<strong>回数(reps)</strong>を入力し、<strong>「+ セット追加」</strong>で2セット目、3セット目を増やせます（2.5kg刻みボタンも使えます）。</li>
+            <li>カード上部に<strong>「MAX（過去最高重量）」</strong>と<strong>「前回記録」</strong>が自動表示されます。<strong>「前回コピー」</strong>を押すと前回のセット構成を一発でコピーできるので入力が爆速になります！</li>
+            <li>RPEやフォームの意識ポイント、撮影動画のメモは各カードの<strong>メモ欄</strong>に残せます。</li>
+            <li>※深夜にトレーニングしてもズレないよう、日付は<strong>朝4:00切り替え</strong>になっています。</li>
+          </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="space-y-1.5">
+          <h3 class="text-sm font-black text-crimson-500 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-crimson-500/20 text-xs">STEP 3</span>
+            カレンダーで過去の重量・メニューを確認
+          </h3>
+          <p class="text-xs leading-relaxed text-gray-300">
+            下の<strong>「カレンダー」</strong>タブを開くと、BIG3をやった日は<span class="text-crimson-500 font-bold">赤丸</span>、補助種目をやった日は<span class="text-amber-400 font-bold">黄丸</span>がつきます。日付をタップすると、その日何キロを何回やったか・メモ内容がすべて見られます。
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="space-y-1.5">
+          <h3 class="text-sm font-black text-crimson-500 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-crimson-500/20 text-xs">STEP 4</span>
+            種目の追加・変更・削除
+          </h3>
+          <p class="text-xs leading-relaxed text-gray-300">
+            下の<strong>「種目管理」</strong>タブから、ナローベンチやポーズスクワットなどのBIG3バリエーションや、各種補助種目を自由に追加・並べ替え・削除できます。種目を削除しても過去のカレンダー履歴は消えません。
+          </p>
+        </div>
+      </div>
+
+      <!-- データバックアップ・復元 -->
+      <div class="bg-steel-800 rounded-2xl p-5 border border-steel-600 space-y-3 shadow-md">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <span>💾</span> データのバックアップと復元
+        </h3>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          記録データはスマホ本体（ブラウザ領域）に自動保存されます。機種変更時や万が一に備えてJSONファイルで保存・復元できます。
+        </p>
+
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <button type="button" onclick="exportBackupJson()" class="py-3 px-3 rounded-xl bg-steel-700 hover:bg-steel-600 border border-steel-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <span>📤</span> ファイル保存
+          </button>
+          <button type="button" onclick="copyBackupToClipboard()" class="py-3 px-3 rounded-xl bg-steel-700 hover:bg-steel-600 border border-steel-500 text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <span>📋</span> テキストコピー
+          </button>
+        </div>
+
+        <div class="pt-1">
+          <label class="w-full py-3 px-3 rounded-xl bg-crimson-500/15 border border-crimson-500/40 text-crimson-400 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer">
+            <span>📥</span> バックアップファイル(.json)から復元
+            <input type="file" accept=".json" onchange="importBackupJson(event)" class="hidden" />
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== 下部ナビゲーションバー ==================== -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-steel-800/95 backdrop-blur-md border-t border-steel-600 px-2 pt-2 safe-bottom z-30">
+    <div class="grid grid-cols-4 gap-1">
+      <button type="button" onclick="switchMainTab('log')" id="nav-log" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-crimson-500 bg-crimson-500/10 font-black transition">
+        <span class="text-lg mb-0.5">🏋️</span>
+        <span class="text-[11px]">記録</span>
+      </button>
+      <button type="button" onclick="switchMainTab('calendar')" id="nav-calendar" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-gray-400 font-bold transition">
+        <span class="text-lg mb-0.5">📅</span>
+        <span class="text-[11px]">カレンダー</span>
+      </button>
+      <button type="button" onclick="switchMainTab('exercises')" id="nav-exercises" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-gray-400 font-bold transition">
+        <span class="text-lg mb-0.5">⚙️</span>
+        <span class="text-[11px]">種目管理</span>
+      </button>
+      <button type="button" onclick="switchMainTab('guide')" id="nav-guide" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-gray-400 font-bold transition">
+        <span class="text-lg mb-0.5">📖</span>
+        <span class="text-[11px]">説明書</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== カスタム確認モーダル ==================== -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-5">
+    <div class="bg-steel-800 rounded-2xl w-full max-w-sm p-5 border border-steel-600 shadow-2xl space-y-4">
+      <h3 id="modalTitle" class="text-base font-black text-white">確認</h3>
+      <p id="modalMessage" class="text-xs text-gray-300 leading-relaxed"></p>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-steel-700 text-gray-300 text-xs font-bold">キャンセル</button>
+        <button type="button" id="modalConfirmBtn" class="px-4 py-2 rounded-xl bg-crimson-500 text-white text-xs font-black">実行する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== トースト通知 ==================== -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 bg-white text-obsidian text-xs font-black px-4 py-2.5 rounded-full shadow-xl whitespace-nowrap">
+    通知メッセージ
+  </div>
+
+  <script>
+    /**
+     * BIG3 LOG - パワーリフティング記録アプリケーション
+     * アーキテクチャ: 単一HTML + LocalStorage + PWA対応
+     */
+
+    const STORAGE_KEY = 'big3_log_powerlifting_v1';
+
+    // 初期種目マスタ
+    const DEFAULT_EXERCISES = [
+      // BIG3カテゴリ
+      { id: 'ex_sq', category: 'big3', name: 'スクワット' },
+      { id: 'ex_bp', category: 'big3', name: 'ベンチプレス' },
+      { id: 'ex_dl', category: 'big3', name: 'デッドリフト' },
+      { id: 'ex_nbp', category: 'big3', name: 'ナローベンチプレス' },
+      { id: 'ex_psq', category: 'big3', name: 'ポーズスクワット' },
+
+      // 補助種目カテゴリ
+      { id: 'ex_lat', category: 'accessory', name: 'ラットプルダウン' },
+      { id: 'ex_bul', category: 'accessory', name: 'ブルガリアンスクワット' },
+      { id: 'ex_rdl', category: 'accessory', name: 'ルーマニアンデッドリフト' },
+      { id: 'ex_idb', category: 'accessory', name: 'インクラインダンベルプレス' },
+      { id: 'ex_chin', category: 'accessory', name: '懸垂（チンニング）' },
+      { id: 'ex_ab', category: 'accessory', name: 'アブローラー' }
+    ];
+
+    // アプリ状態
+    // workouts構造: { "2026-11-25": [ { entryId, exerciseId, exerciseName, category, sets: [{ weight, reps }], memo } ] }
+    let appState = {
+      exercises: [],
+      workouts: {}
+    };
+
+    // UI制御状態
+    let currentMainTab = 'log';
+    let currentLogDateKey = '';
+    let currentLogCategory = 'big3'; // 'big3' | 'accessory'
+    let calendarYear = 2026;
+    let calendarMonth = 10; // 0-indexed
+    let calendarSelectedDateKey = '';
+    let masterAddCategory = 'big3';
+
+    // ==================== 日付ユーティリティ（朝4時リセット基準） ====================
+
+    function getEffectiveTodayDate() {
+      return new Date(Date.now() - 4 * 60 * 60 * 1000);
+    }
+
+    function formatDateKey(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseDateKey(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function formatJapaneseDateLabel(dateKey) {
+      const dt = parseDateKey(dateKey);
+      const days = ['日', '月', '火', '水', '木', '金', '土'];
+      return `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')} (${days[dt.getDay()]})`;
+    }
+
+    // ==================== ストレージ保存・読み込み ====================
+
+    function loadAppState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.exercises) && typeof parsed.workouts === 'object' && parsed.workouts !== null) {
+            appState = parsed;
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Load error:', e);
+      }
+      appState = {
+        exercises: JSON.parse(JSON.stringify(DEFAULT_EXERCISES)),
+        workouts: {}
+      };
+      saveAppState();
+    }
+
+    let saveIndicatorTimer = null;
+    function saveAppState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        const textEl = document.getElementById('saveStatusText');
+        if (textEl) {
+          textEl.textContent = '保存中...';
+          clearTimeout(saveIndicatorTimer);
+          saveIndicatorTimer = setTimeout(() => {
+            textEl.textContent = '保存済';
+          }, 350);
+        }
+      } catch (e) {
+        showToast('データの保存に失敗しました');
+      }
+    }
+
+    // ==================== 過去データ解析（前回記録 & 自己ベストMAX） ====================
+
+    /**
+     * 指定種目・指定日より前の直近のワークアウト記録を取得
+     */
+    function getPreviousSessionEntry(exerciseId, exerciseName, beforeDateKey) {
+      const pastDates = Object.keys(appState.workouts)
+        .filter(d => d < beforeDateKey)
+        .sort((a, b) => b.localeCompare(a)); // 新しい順
+
+      for (const dKey of pastDates) {
+        const entries = appState.workouts[dKey] || [];
+        const match = entries.find(e => e.exerciseId === exerciseId || e.exerciseName === exerciseName);
+        if (match && match.sets && match.sets.length > 0) {
+          // 有効な数値が入っているセットがあるか確認
+          const validSets = match.sets.filter(s => Number(s.weight) > 0 || Number(s.reps) > 0);
+          if (validSets.length > 0) {
+            return { dateKey: dKey, entry: match };
+          }
+        }
+      }
+      return null;
+    }
+
+    /**
+     * 全期間における該当種目の最高重量（MAX）を取得
+     */
+    function getAllTimeMaxWeight(exerciseId, exerciseName) {
+      let maxWeight = 0;
+      Object.values(appState.workouts).forEach(entries => {
+        entries.forEach(e => {
+          if (e.exerciseId === exerciseId || e.exerciseName === exerciseName) {
+            (e.sets || []).forEach(s => {
+              const w = parseFloat(s.weight);
+              if (!isNaN(w) && w > maxWeight) {
+                maxWeight = w;
+              }
+            });
+          }
+        });
+      });
+      return maxWeight;
+    }
+
+    // ==================== 記録タブ：操作アクション ====================
+
+    function shiftLogDate(deltaDays) {
+      const dt = parseDateKey(currentLogDateKey);
+      dt.setDate(dt.getDate() + deltaDays);
+      currentLogDateKey = formatDateKey(dt);
+      renderLogView();
+    }
+
+    function jumpToToday() {
+      currentLogDateKey = formatDateKey(getEffectiveTodayDate());
+      renderLogView();
+    }
+
+    function switchLogCategory(cat) {
+      currentLogCategory = cat;
+      const btnBig3 = document.getElementById('subtab-big3');
+      const btnAcc = document.getElementById('subtab-accessory');
+
+      if (cat === 'big3') {
+        btnBig3.className = 'py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 bg-crimson-500 text-white shadow-lg shadow-crimson-500/25';
+        btnAcc.className = 'py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 text-gray-400 hover:text-white';
+      } else {
+        btnBig3.className = 'py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 text-gray-400 hover:text-white';
+        btnAcc.className = 'py-2.5 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2 bg-amber-500 text-obsidian shadow-lg shadow-amber-500/25';
+      }
+      renderLogView();
+    }
+
+    function addExerciseToCurrentDay() {
+      const selectEl = document.getElementById('exerciseSelectDropdown');
+      const selectedId = selectEl.value;
+      const masterEx = appState.exercises.find(e => e.id === selectedId);
+      if (!masterEx) {
+        showToast('種目を選択してください');
+        return;
+      }
+
+      if (!appState.workouts[currentLogDateKey]) {
+        appState.workouts[currentLogDateKey] = [];
+      }
+
+      // 前回記録があれば1セット目のデフォルト値として参考にする（空でもOK）
+      const prev = getPreviousSessionEntry(masterEx.id, masterEx.name, currentLogDateKey);
+      const initialSets = prev && prev.entry.sets.length > 0
+        ? [{ weight: prev.entry.sets[0].weight, reps: prev.entry.sets[0].reps }]
+        : [{ weight: '', reps: '' }];
+
+      const newEntry = {
+        entryId: 'ent_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        exerciseId: masterEx.id,
+        exerciseName: masterEx.name,
+        category: masterEx.category,
+        sets: initialSets,
+        memo: ''
+      };
+
+      appState.workouts[currentLogDateKey].push(newEntry);
+      saveAppState();
+      renderLogView();
+      showToast(`${masterEx.name} を追加しました`);
+    }
+
+    function copyPreviousSets(entryId) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      const prev = getPreviousSessionEntry(entry.exerciseId, entry.exerciseName, currentLogDateKey);
+      if (!prev) {
+        showToast('前回の記録が見つかりません');
+        return;
+      }
+
+      entry.sets = prev.entry.sets.map(s => ({ weight: s.weight, reps: s.reps }));
+      saveAppState();
+      renderLogView();
+      showToast('前回のセット構成をコピーしました🔥');
+    }
+
+    function addSetToEntry(entryId) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      // 直前のセットと同じ重量・回数を引き継いで追加するとジムでの入力が楽
+      const lastSet = entry.sets[entry.sets.length - 1];
+      entry.sets.push({
+        weight: lastSet ? lastSet.weight : '',
+        reps: lastSet ? lastSet.reps : ''
+      });
+
+      saveAppState();
+      renderLogView();
+    }
+
+    function removeSetFromEntry(entryId, setIndex) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      if (entry.sets.length <= 1) {
+        showToast('最低1セットは必要です（種目ごと消す場合は右上の削除）');
+        return;
+      }
+      entry.sets.splice(setIndex, 1);
+      saveAppState();
+      renderLogView();
+    }
+
+    function updateSetField(entryId, setIndex, field, value) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry || !entry.sets[setIndex]) return;
+
+      entry.sets[setIndex][field] = value;
+      saveAppState();
+      updateDayVolumeHeaderOnly();
+    }
+
+    function stepSetWeight(entryId, setIndex, delta) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry || !entry.sets[setIndex]) return;
+
+      const current = parseFloat(entry.sets[setIndex].weight) || 0;
+      const next = Math.max(0, Math.round((current + delta) * 10) / 10);
+      entry.sets[setIndex].weight = next === 0 ? '' : String(next);
+      saveAppState();
+      renderLogView();
+    }
+
+    function updateEntryMemo(entryId, value) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      entry.memo = value;
+      saveAppState();
+    }
+
+    function confirmRemoveEntry(entryId) {
+      const dayEntries = appState.workouts[currentLogDateKey] || [];
+      const entry = dayEntries.find(e => e.entryId === entryId);
+      if (!entry) return;
+
+      openConfirmModal(
+        '種目記録の削除',
+        `この日の「${entry.exerciseName}」のセット記録を削除しますか？`,
+        () => {
+          appState.workouts[currentLogDateKey] = dayEntries.filter(e => e.entryId !== entryId);
+          if (appState.workouts[currentLogDateKey].length === 0) {
+            delete appState.workouts[currentLogDateKey];
+          }
+          saveAppState();
+          renderLogView();
+          showToast('記録を削除しました');
+        }
+      );
+    }
+
+    // ==================== 記録タブ：レンダリング ====================
+
+    function calculateDayTotalVolume(dateKey) {
+      const entries = appState.workouts[dateKey] || [];
+      let total = 0;
+      entries.forEach(entry => {
+        (entry.sets || []).forEach(s => {
+          const w = parseFloat(s.weight) || 0;
+          const r = parseInt(s.reps, 10) || 0;
+          total += w * r;
+        });
+      });
+      return Math.round(total * 10) / 10;
+    }
+
+    function updateDayVolumeHeaderOnly() {
+      const vol = calculateDayTotalVolume(currentLogDateKey);
+      document.getElementById('logDaySummaryText').textContent = `総挙上ボリューム: ${vol.toLocaleString()} kg`;
+    }
+
+    function renderLogView() {
+      const todayKey = formatDateKey(getEffectiveTodayDate());
+      const isToday = currentLogDateKey === todayKey;
+
+      document.getElementById('logDateDisplay').textContent = formatJapaneseDateLabel(currentLogDateKey);
+      document.getElementById('logTodayBadge').classList.toggle('hidden', !isToday);
+      document.getElementById('jumpTodayBtn').classList.toggle('hidden', isToday);
+      updateDayVolumeHeaderOnly();
+
+      // サブタブ件数バッジ更新
+      const allDayEntries = appState.workouts[currentLogDateKey] || [];
+      const big3Entries = allDayEntries.filter(e => e.category === 'big3');
+      const accEntries = allDayEntries.filter(e => e.category === 'accessory');
+
+      document.getElementById('count-badge-big3').textContent = big3Entries.length;
+      document.getElementById('count-badge-accessory').textContent = accEntries.length;
+
+      // ドロップダウンの種目選択肢を更新
+      const dropdown = document.getElementById('exerciseSelectDropdown');
+      const filteredMaster = appState.exercises.filter(e => e.category === currentLogCategory);
+      if (filteredMaster.length === 0) {
+        dropdown.innerHTML = `<option value="">種目管理から追加してください</option>`;
+      } else {
+        dropdown.innerHTML = filteredMaster.map(ex =>
+          `<option value="${ex.id}">${escapeHtml(ex.name)}</option>`
+        ).join('');
+      }
+
+      // 実施種目カードの描画
+      const container = document.getElementById('activeWorkoutContainer');
+      const targetEntries = currentLogCategory === 'big3' ? big3Entries : accEntries;
+
+      if (targetEntries.length === 0) {
+        const catTitle = currentLogCategory === 'big3' ? 'BIG3' : '補助種目';
+        container.innerHTML = `
+          <div class="bg-steel-800/60 rounded-2xl p-8 text-center border border-dashed border-steel-600 space-y-2">
+            <p class="text-sm font-black text-gray-300">${catTitle}の記録がまだありません</p>
+            <p class="text-xs text-gray-400">上のプルダウンから種目を選んで「+ 追加」を押してください</p>
+          </div>
+        `;
+        return;
+      }
+
+      const accentBorder = currentLogCategory === 'big3' ? 'border-l-crimson-500' : 'border-l-amber-500';
+
+      container.innerHTML = targetEntries.map(entry => {
+        const maxWeight = getAllTimeMaxWeight(entry.exerciseId, entry.exerciseName);
+        const prevSession = getPreviousSessionEntry(entry.exerciseId, entry.exerciseName, currentLogDateKey);
+
+        let prevSummaryHtml = `<span class="text-gray-500">前回記録なし</span>`;
+        let copyBtnHtml = '';
+
+        if (prevSession) {
+          const setsText = prevSession.entry.sets
+            .filter(s => s.weight || s.reps)
+            .map(s => `${s.weight || 0}kg×${s.reps || 0}`)
+            .join(' / ');
+          const shortDate = prevSession.dateKey.slice(5).replace('-', '/');
+          prevSummaryHtml = `<span class="text-gray-300">前回(${shortDate}): ${escapeHtml(setsText)}</span>`;
+          copyBtnHtml = `
+            <button type="button" onclick="copyPreviousSets('${entry.entryId}')" class="px-2.5 py-1 rounded-lg bg-steel-700 hover:bg-steel-600 border border-steel-500 text-[11px] font-black text-amber-400 active:scale-95 transition shrink-0">
+              前回コピー
+            </button>
+          `;
+        }
+
+        const setsRowsHtml = entry.sets.map((set, idx) => `
+          <div class="grid grid-cols-12 gap-1.5 items-center bg-obsidian/90 p-2 rounded-xl border border-steel-600/80">
+            <!-- セット番号 -->
+            <div class="col-span-2 text-center">
+              <span class="inline-block px-2 py-1 rounded-md bg-steel-700 text-[11px] font-black text-gray-300">
+                ${idx + 1}SET
+              </span>
+            </div>
+
+            <!-- 重量(kg)入力 + 微調整ボタン -->
+            <div class="col-span-5 flex items-center bg-steel-800 rounded-lg border border-steel-500 overflow-hidden">
+              <button type="button" onclick="stepSetWeight('${entry.entryId}', ${idx}, -2.5)" class="px-2 py-2 text-gray-400 hover:text-white font-black text-xs active:bg-steel-700">-</button>
+              <input
+                type="number"
+                inputmode="decimal"
+                step="0.5"
+                placeholder="0"
+                value="${escapeHtml(set.weight)}"
+                oninput="updateSetField('${entry.entryId}', ${idx}, 'weight', this.value)"
+                class="w-full bg-transparent text-center text-sm font-black text-white focus:outline-none"
+              />
+              <span class="text-[10px] font-bold text-gray-400 pr-1">kg</span>
+              <button type="button" onclick="stepSetWeight('${entry.entryId}', ${idx}, 2.5)" class="px-2 py-2 text-gray-400 hover:text-white font-black text-xs active:bg-steel-700">+</button>
+            </div>
+
+            <!-- 回数(reps)入力 -->
+            <div class="col-span-4 flex items-center bg-steel-800 rounded-lg border border-steel-500 px-2">
+              <input
+                type="number"
+                inputmode="numeric"
+                placeholder="0"
+                value="${escapeHtml(set.reps)}"
+                oninput="updateSetField('${entry.entryId}', ${idx}, 'reps', this.value)"
+                class="w-full bg-transparent text-center text-sm font-black text-white py-2 focus:outline-none"
+              />
+              <span class="text-[10px] font-bold text-gray-400 shrink-0">回</span>
+            </div>
+
+            <!-- セット削除ボタン -->
+            <div class="col-span-1 flex justify-center">
+              <button type="button" onclick="removeSetFromEntry('${entry.entryId}', ${idx})" class="w-7 h-7 rounded-lg text-gray-500 hover:text-crimson-500 flex items-center justify-center text-sm font-bold" aria-label="セット削除">
+                ✕
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="bg-steel-800 rounded-2xl p-4 border border-steel-600 border-l-4 ${accentBorder} shadow-lg space-y-3">
+            <!-- カードヘッダー：種目名・MAX・削除 -->
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-base font-black text-white">${escapeHtml(entry.exerciseName)}</h3>
+                  ${maxWeight > 0 ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black">MAX ${maxWeight}kg</span>` : ''}
+                </div>
+                <div class="text-[11px] font-medium mt-1">${prevSummaryHtml}</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                ${copyBtnHtml}
+                <button type="button" onclick="confirmRemoveEntry('${entry.entryId}')" class="w-8 h-8 rounded-lg bg-steel-700/70 hover:bg-crimson-500/20 text-gray-400 hover:text-crimson-500 flex items-center justify-center text-xs transition" title="この種目を削除">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- セット一覧 -->
+            <div class="space-y-2">
+              ${setsRowsHtml}
+            </div>
+
+            <!-- セット追加ボタン -->
+            <button type="button" onclick="addSetToEntry('${entry.entryId}')" class="w-full py-2.5 rounded-xl bg-steel-700 hover:bg-steel-600 border border-steel-500 text-xs font-black text-white active:scale-[0.99] transition">
+              + セット追加
+            </button>
+
+            <!-- 種目メモ欄 -->
+            <div class="pt-1">
+              <input
+                type="text"
+                placeholder="📝 メモ（RPE、フォーム意識、動画タイム等）"
+                value="${escapeHtml(entry.memo || '')}"
+                oninput="updateEntryMemo('${entry.entryId}', this.value)"
+                class="w-full bg-obsidian border border-steel-600 rounded-xl px-3 py-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== カレンダータブ：レンダリング ====================
+
+    function changeCalendarMonth(delta) {
+      calendarMonth += delta;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      } else if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderCalendarView();
+    }
+
+    function selectCalendarDay(dateKey) {
+      calendarSelectedDateKey = dateKey;
+      renderCalendarView();
+    }
+
+    function editSelectedCalendarDate() {
+      if (!calendarSelectedDateKey) return;
+      currentLogDateKey = calendarSelectedDateKey;
+      switchMainTab('log');
+    }
+
+    function renderCalendarView() {
+      document.getElementById('calendarMonthTitle').textContent = `${calendarYear}年 ${calendarMonth + 1}月`;
+
+      const firstDay = new Date(calendarYear, calendarMonth, 1);
+      const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // 月曜始まり
+
+      const todayKey = formatDateKey(getEffectiveTodayDate());
+      if (!calendarSelectedDateKey) calendarSelectedDateKey = todayKey;
+
+      const monthPrefix = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}`;
+      let trainedDaysCount = 0;
+
+      let gridHtml = '';
+      for (let i = 0; i < startOffset; i++) {
+        gridHtml += `<div class="aspect-square"></div>`;
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dKey = `${monthPrefix}-${String(d).padStart(2, '0')}`;
+        const entries = appState.workouts[dKey] || [];
+        const hasBig3 = entries.some(e => e.category === 'big3');
+        const hasAcc = entries.some(e => e.category === 'accessory');
+
+        if (entries.length > 0) trainedDaysCount++;
+
+        const isSelected = dKey === calendarSelectedDateKey;
+        const isToday = dKey === todayKey;
+
+        let dotsHtml = `<div class="h-2 flex items-center justify-center gap-1">`;
+        if (hasBig3) dotsHtml += `<span class="w-1.5 h-1.5 rounded-full bg-crimson-500"></span>`;
+        if (hasAcc) dotsHtml += `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>`;
+        dotsHtml += `</div>`;
+
+        gridHtml += `
+          <button
+            type="button"
+            onclick="selectCalendarDay('${dKey}')"
+            class="aspect-square rounded-xl flex flex-col items-center justify-center gap-1 transition active:scale-95 ${
+              isSelected
+                ? 'bg-crimson-500 text-white font-black shadow-md shadow-crimson-500/30'
+                : isToday
+                ? 'bg-steel-700 text-white font-black border border-crimson-500/60'
+                : entries.length > 0
+                ? 'bg-steel-700/50 text-white font-bold'
+                : 'text-gray-400 hover:bg-steel-700/30 font-medium'
+            }"
+          >
+            <span class="text-xs leading-none">${d}</span>
+            ${dotsHtml}
+          </button>
+        `;
+      }
+
+      document.getElementById('calendarMonthStats').textContent = `今月のトレーニング日数: ${trainedDaysCount}日`;
+      document.getElementById('calendarGrid').innerHTML = gridHtml;
+
+      // 選択日の詳細レンダリング
+      const dt = parseDateKey(calendarSelectedDateKey);
+      document.getElementById('calSelectedDateTitle').textContent = `${dt.getMonth() + 1}月${dt.getDate()}日のトレーニング記録`;
+      const dayVolume = calculateDayTotalVolume(calendarSelectedDateKey);
+      document.getElementById('calSelectedDateVolume').textContent = `総挙上ボリューム: ${dayVolume.toLocaleString()} kg`;
+
+      const detailsContainer = document.getElementById('calSelectedDateDetails');
+      const entries = appState.workouts[calendarSelectedDateKey] || [];
+
+      if (entries.length === 0) {
+        detailsContainer.innerHTML = `
+          <div class="bg-obsidian rounded-xl p-6 text-center text-xs text-gray-500 border border-steel-600/60">
+            この日のトレーニング記録はありません（REST DAY）
+          </div>
+        `;
+        return;
+      }
+
+      detailsContainer.innerHTML = entries.map(entry => {
+        const isBig3 = entry.category === 'big3';
+        const badgeHtml = isBig3
+          ? `<span class="px-2 py-0.5 rounded bg-crimson-500/20 text-crimson-500 text-[10px] font-black">BIG3</span>`
+          : `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-black">補助</span>`;
+
+        const setsTagsHtml = (entry.sets || []).map((s, i) => `
+          <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-steel-800 border border-steel-600 text-xs font-bold text-gray-200">
+            <span class="text-[10px] text-gray-400 mr-1">${i + 1}S:</span>
+            ${escapeHtml(s.weight || '0')}kg × ${escapeHtml(s.reps || '0')}回
+          </span>
+        `).join('');
+
+        return `
+          <div class="bg-obsidian rounded-xl p-3.5 border border-steel-600 space-y-2">
+            <div class="flex items-center gap-2">
+              ${badgeHtml}
+              <span class="text-sm font-black text-white">${escapeHtml(entry.exerciseName)}</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              ${setsTagsHtml}
+            </div>
+            ${entry.memo ? `<p class="text-xs text-amber-400/90 bg-steel-800/80 px-2.5 py-1.5 rounded-lg">📝 ${escapeHtml(entry.memo)}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== 種目管理タブ：操作 & レンダリング ====================
+
+    function selectMasterCategory(cat) {
+      masterAddCategory = cat;
+      const btnBig3 = document.getElementById('masterCatBtn-big3');
+      const btnAcc = document.getElementById('masterCatBtn-accessory');
+
+      if (cat === 'big3') {
+        btnBig3.className = 'py-2.5 rounded-xl text-xs font-black border-2 border-crimson-500 bg-crimson-500/15 text-crimson-500 transition';
+        btnAcc.className = 'py-2.5 rounded-xl text-xs font-black border border-steel-600 bg-steel-700 text-gray-300 transition';
+      } else {
+        btnBig3.className = 'py-2.5 rounded-xl text-xs font-black border border-steel-600 bg-steel-700 text-gray-300 transition';
+        btnAcc.className = 'py-2.5 rounded-xl text-xs font-black border-2 border-amber-500 bg-amber-500/15 text-amber-400 transition';
+      }
+    }
+
+    function handleAddMasterExercise() {
+      const input = document.getElementById('newExerciseNameInput');
+      const name = input.value.trim();
+      if (!name) {
+        showToast('種目名を入力してください');
+        input.focus();
+        return;
+      }
+
+      const exists = appState.exercises.some(e => e.category === masterAddCategory && e.name === name);
+      if (exists) {
+        showToast('同じ名前の種目がすでに登録されています');
+        return;
+      }
+
+      appState.exercises.push({
+        id: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+        category: masterAddCategory,
+        name: name
+      });
+      saveAppState();
+      input.value = '';
+      renderExerciseMasterView();
+      showToast(`「${name}」を登録しました🔥`);
+    }
+
+    function moveMasterExercise(exId, direction) {
+      const target = appState.exercises.find(e => e.id === exId);
+      if (!target) return;
+
+      const sameCat = appState.exercises.filter(e => e.category === target.category);
+      const idx = sameCat.findIndex(e => e.id === exId);
+      const swapIdx = idx + direction;
+      if (swapIdx < 0 || swapIdx >= sameCat.length) return;
+
+      const swapTarget = sameCat[swapIdx];
+      const globalA = appState.exercises.findIndex(e => e.id === target.id);
+      const globalB = appState.exercises.findIndex(e => e.id === swapTarget.id);
+
+      [appState.exercises[globalA], appState.exercises[globalB]] = [appState.exercises[globalB], appState.exercises[globalA]];
+      saveAppState();
+      renderExerciseMasterView();
+    }
+
+    function confirmDeleteMasterExercise(exId) {
+      const target = appState.exercises.find(e => e.id === exId);
+      if (!target) return;
+
+      openConfirmModal(
+        '種目マスタから削除',
+        `「${target.name}」を種目リストから削除しますか？（※これまでにカレンダーへ記録した過去のワークアウトデータは消えずに残ります）`,
+        () => {
+          appState.exercises = appState.exercises.filter(e => e.id !== exId);
+          saveAppState();
+          renderExerciseMasterView();
+          showToast('種目を削除しました');
+        }
+      );
+    }
+
+    function renderExerciseMasterView() {
+      ['big3', 'accessory'].forEach(cat => {
+        const container = document.getElementById(`masterList-${cat}`);
+        const list = appState.exercises.filter(e => e.category === cat);
+
+        if (list.length === 0) {
+          container.innerHTML = `<p class="text-xs text-gray-500 text-center py-3">登録種目がありません</p>`;
+          return;
+        }
+
+        container.innerHTML = list.map((ex, idx) => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-obsidian border border-steel-600 gap-2">
+            <span class="text-sm font-bold text-white truncate">${escapeHtml(ex.name)}</span>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="moveMasterExercise('${ex.id}', -1)" ${idx === 0 ? 'disabled' : ''} class="w-8 h-8 rounded-lg bg-steel-800 border border-steel-600 text-xs font-bold text-gray-300 disabled:opacity-25">↑</button>
+              <button type="button" onclick="moveMasterExercise('${ex.id}', 1)" ${idx === list.length - 1 ? 'disabled' : ''} class="w-8 h-8 rounded-lg bg-steel-800 border border-steel-600 text-xs font-bold text-gray-300 disabled:opacity-25">↓</button>
+              <button type="button" onclick="confirmDeleteMasterExercise('${ex.id}')" class="px-2.5 h-8 rounded-lg bg-crimson-500/15 border border-crimson-500/30 text-crimson-500 text-xs font-bold ml-1">削除</button>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+
+    // ==================== バックアップ＆復元 ====================
+
+    function exportBackupJson() {
+      try {
+        const jsonStr = JSON.stringify(appState, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateTag = formatDateKey(getEffectiveTodayDate());
+        a.href = url;
+        a.download = `big3_log_backup_${dateTag}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('バックアップファイルを保存しました📦');
+      } catch (e) {
+        showToast('ファイルの出力に失敗しました');
+      }
+    }
+
+    function copyBackupToClipboard() {
+      try {
+        const jsonStr = JSON.stringify(appState);
+        const textarea = document.createElement('textarea');
+        textarea.value = jsonStr;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('バックアップデータをコピーしました📋');
+      } catch (e) {
+        showToast('コピーに失敗しました');
+      }
+    }
+
+    function importBackupJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.exercises) && typeof parsed.workouts === 'object' && parsed.workouts !== null) {
+            appState = parsed;
+            saveAppState();
+            renderLogView();
+            showToast('データを正常に復元しました🔥');
+          } else {
+            showToast('無効なバックアップファイルです');
+          }
+        } catch (err) {
+          showToast('JSONファイルの読み込みに失敗しました');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    // ==================== ナビゲーション・モーダル・トースト ====================
+
+    function switchMainTab(tab) {
+      currentMainTab = tab;
+      const tabs = ['log', 'calendar', 'exercises', 'guide'];
+
+      tabs.forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        const navEl = document.getElementById(`nav-${t}`);
+        if (t === tab) {
+          viewEl.classList.remove('hidden');
+          navEl.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-crimson-500 bg-crimson-500/10 font-black transition';
+        } else {
+          viewEl.classList.add('hidden');
+          navEl.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-gray-400 font-bold transition';
+        }
+      });
+
+      if (tab === 'log') renderLogView();
+      if (tab === 'calendar') {
+        const dt = parseDateKey(currentLogDateKey);
+        calendarYear = dt.getFullYear();
+        calendarMonth = dt.getMonth();
+        calendarSelectedDateKey = currentLogDateKey;
+        renderCalendarView();
+      }
+      if (tab === 'exercises') renderExerciseMasterView();
+    }
+
+    let pendingConfirmCallback = null;
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      pendingConfirmCallback = onConfirm;
+
+      const modal = document.getElementById('confirmModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirmModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      pendingConfirmCallback = null;
+    }
+
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+      if (pendingConfirmCallback) pendingConfirmCallback();
+      closeConfirmModal();
+    });
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 初期化処理
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAppState();
+      const todayEff = getEffectiveTodayDate();
+      currentLogDateKey = formatDateKey(todayEff);
+      calendarYear = todayEff.getFullYear();
+      calendarMonth = todayEff.getMonth();
+      calendarSelectedDateKey = currentLogDateKey;
+      switchMainTab('log');
+    });
+  </script>
+</body>
+</html>
